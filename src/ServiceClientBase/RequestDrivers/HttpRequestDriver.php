@@ -23,7 +23,7 @@ class HttpRequestDriver implements RequestDriver
      */
     public function makeRequest(string $method, string $endpoint, array $data = [], array $headers = [], array $options = []): Response
     {
-        $maxTries = env("SEAMLESS_WALLET_CLIENT_MAXIMUM_NUMBER_OF_RETRIES", 3);
+        $maxTries = env("SERVICE_CLIENT_MAXIMUM_NUMBER_OF_RETRIES", 3);
         $try = 0;
 
         do {
@@ -31,7 +31,7 @@ class HttpRequestDriver implements RequestDriver
             $response = Http::withHeaders($headers)
                 ->asJson()
                 ->acceptJson()
-                ->timeout(env("SEAMLESS_WALLET_CLIENT_TIMEOUT", 1))
+                ->timeout(env("SERVICE_CLIENT_TIMEOUT", 1))
                 ->$method($endpoint, $data);
 
             // Bailout if successful
@@ -45,7 +45,7 @@ class HttpRequestDriver implements RequestDriver
             }
 
             // Wait 1 sec before trying again, if server error
-            usleep(env("SEAMLESS_WALLET_CLIENT_RETRY_DELAY", 1000000));
+            usleep(env("SERVICE_CLIENT_RETRY_DELAY", 1000000));
             $try++;
         } while ($try < $maxTries);
 
