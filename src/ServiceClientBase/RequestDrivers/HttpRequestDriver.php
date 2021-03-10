@@ -33,11 +33,6 @@ class HttpRequestDriver implements RequestDriver
                             ->retry(env("SERVICE_CLIENT_MAXIMUM_NUMBER_OF_RETRIES", 3), env("SERVICE_CLIENT_RETRY_DELAY", 100))
                             ->$method($endpoint, $data);
 
-            // If request failed, then throw a ServiceRequestFailedException
-            if ($response->failed()) {
-                throw new ServiceRequestFailedException($response);
-            }
-
             return $this->transformResponse($response);
         } catch (RequestException $exception) {
             throw new ServiceRequestFailedException($exception->response);

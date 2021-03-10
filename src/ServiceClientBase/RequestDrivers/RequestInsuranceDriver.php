@@ -3,9 +3,7 @@
 namespace Cego\ServiceClientBase\RequestDrivers;
 
 use JsonException;
-use Illuminate\Support\Facades\Http;
 use Cego\RequestInsurance\Models\RequestInsurance;
-use Illuminate\Http\Client\Response as HttpResponse;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 class RequestInsuranceDriver implements RequestDriver
@@ -77,17 +75,5 @@ class RequestInsuranceDriver implements RequestDriver
         }
 
         return $request;
-    }
-
-    /**
-     * Transforms a http response into the expected response class
-     *
-     * @param HttpResponse $httpResponse
-     *
-     * @return Response
-     */
-    protected function transformResponse(HttpResponse $httpResponse): Response
-    {
-        return new Response($httpResponse->status(), $httpResponse->json(), true);
     }
 }
