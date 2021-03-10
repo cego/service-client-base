@@ -231,7 +231,7 @@ abstract class AbstractServiceClient
      */
     protected function prependBaseUrl(string $endpoint): string
     {
-        return sprintf('%s%s', $this->serviceBaseUrl, $endpoint);
+        return sprintf('%s/%s', $this->serviceBaseUrl, ltrim($endpoint, '/'));
     }
 
     /**
