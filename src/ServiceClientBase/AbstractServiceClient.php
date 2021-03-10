@@ -157,7 +157,7 @@ abstract class AbstractServiceClient
     {
         if (is_array($header)) {
             foreach ($header as $headerItem) {
-                $this->popGlobalHeader($header);
+                $this->popGlobalHeader($headerItem);
             }
 
             return $this;
