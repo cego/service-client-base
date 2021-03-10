@@ -31,7 +31,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
         if (isset($uses[RefreshDatabase::class])) {
             // Run request-insurance migrations
-            $this->loadMigrationsFrom(__DIR__ . '/../../vendor/cego/request-insurance/publishable/migrations');
+            $this->loadMigrationsFrom(__DIR__ . '/../vendor/cego/request-insurance/publishable/migrations');
         }
 
         return $this->setUpTheTestEnvironmentTraits($uses);
