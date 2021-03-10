@@ -19,7 +19,7 @@ class ServiceRequestFailedException extends Exception
      */
     public function __construct(Response $response, Throwable $previous = null)
     {
-        $message = sprintf("Seamless Wallet Service [%s]: \n %s", $response->status(), $response->body());
+        $message = sprintf("Failed Service request [%s] [%s]: \n %s", $response->status(), $response->effectiveUri()->getPath(), $response->body());
 
         parent::__construct($message, 500, $previous);
     }
