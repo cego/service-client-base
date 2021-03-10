@@ -48,7 +48,7 @@ abstract class AbstractServiceClient
      */
     final protected function __construct(string $serviceBaseUrl)
     {
-        $this->serviceBaseUrl = trim($serviceBaseUrl, '/');
+        $this->serviceBaseUrl = rtrim($serviceBaseUrl, '/');
 
         // Validate data
         if (empty($this->serviceBaseUrl)) {
