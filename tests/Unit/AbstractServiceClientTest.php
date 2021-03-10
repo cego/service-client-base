@@ -4,9 +4,11 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use Tests\TestServiceClient;
+use InvalidArgumentException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Cego\ServiceClientBase\Exceptions\InvalidHeaderException;
 use Cego\ServiceClientBase\Exceptions\MissingSuggestedDependencyException;
 
 class AbstractServiceClientTest extends TestCase
@@ -65,5 +67,55 @@ class AbstractServiceClientTest extends TestCase
         $this->assertNull($response->data->get('header1'));
         $this->assertEquals('value2', $response->data->get('header2')[0]);
         $this->assertNull($response->data->get('header3'));
+    }
+
+    /** @test */
+    public function it_only_accept_string_headers_push_single(): void
+    {
+        // Arrange
+        $this->expectException(InvalidHeaderException::class);
+
+        // Act
+        $this->client->pushGlobalHeader(123, 123);
+    }
+
+    /** @test */
+    public function it_only_accept_string_headers_push_array(): void
+    {
+        // Arrange
+        $this->expectException(InvalidHeaderException::class);
+
+        // Act
+        $this->client->pushGlobalHeader([1, 2, 3]);
+    }
+
+    /** @test */
+    public function it_only_accept_string_headers_pop_single(): void
+    {
+        // Arrange
+        $this->expectException(InvalidHeaderException::class);
+
+        // Act
+        $this->client->popGlobalHeader(1);
+    }
+
+    /** @test */
+    public function it_only_accept_string_headers_pop_array(): void
+    {
+        // Arrange
+        $this->expectException(InvalidHeaderException::class);
+
+        // Act
+        $this->client->popGlobalHeader([1, 2, 3]);
+    }
+
+    /** @test */
+    public function it_cannot_have_empty_base_url(): void
+    {
+        // Arrange
+        $this->expectException(InvalidArgumentException::class);
+
+        // Act
+        TestServiceClient::create('');
     }
 }
