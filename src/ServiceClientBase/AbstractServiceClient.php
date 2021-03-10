@@ -141,7 +141,7 @@ abstract class AbstractServiceClient
     }
 
     /**
-     * Push headers to the global headers array, which applies these headers to all requests made by the client.
+     * Pops headers from the global headers array.
      *
      * Either pop a single header by:
      *  ->popGlobalHeader('Header_Name')
