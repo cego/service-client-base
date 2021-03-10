@@ -27,8 +27,6 @@ class HttpRequestDriver implements RequestDriver
         try {
             /** @var HttpResponse $response */
             $response = Http::withHeaders($headers)
-                            ->asJson()
-                            ->acceptJson()
                             ->timeout(env("SERVICE_CLIENT_TIMEOUT", 1))
                             ->retry(env("SERVICE_CLIENT_MAXIMUM_NUMBER_OF_RETRIES", 3), env("SERVICE_CLIENT_RETRY_DELAY", 100))
                             ->$method($endpoint, $data);
