@@ -3,6 +3,7 @@
 namespace Cego\ServiceClientBase\RequestDrivers;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response as HttpResponse;
 use Cego\ServiceClientBase\Exceptions\ServiceRequestFailedException;
 
@@ -23,33 +24,24 @@ class HttpRequestDriver implements RequestDriver
      */
     public function makeRequest(string $method, string $endpoint, array $data = [], array $headers = [], array $options = []): Response
     {
-        $maxTries = env("SERVICE_CLIENT_MAXIMUM_NUMBER_OF_RETRIES", 3);
-        $try = 0;
-
-        do {
+        try {
             /** @var HttpResponse $response */
             $response = Http::withHeaders($headers)
-                ->asJson()
-                ->acceptJson()
-                ->timeout(env("SERVICE_CLIENT_TIMEOUT", 1))
-                ->$method($endpoint, $data);
+                            ->asJson()
+                            ->acceptJson()
+                            ->timeout(env("SERVICE_CLIENT_TIMEOUT", 1))
+                            ->retry(env("SERVICE_CLIENT_MAXIMUM_NUMBER_OF_RETRIES", 3), env("SERVICE_CLIENT_RETRY_DELAY", 100))
+                            ->$method($endpoint, $data);
 
-            // Bailout if successful
-            if ($response->successful()) {
-                return $this->transformResponse($response);
-            }
-
-            // Do not retry client errors
-            if ($response->clientError()) {
+            // If request failed, then throw a ServiceRequestFailedException
+            if ($response->failed()) {
                 throw new ServiceRequestFailedException($response);
             }
 
-            // Wait 1 sec before trying again, if server error
-            usleep(env("SERVICE_CLIENT_RETRY_DELAY", 1000000));
-            $try++;
-        } while ($try < $maxTries);
-
-        throw new ServiceRequestFailedException($response);
+            return $this->transformResponse($response);
+        } catch (RequestException $exception) {
+            throw new ServiceRequestFailedException($exception->response);
+        }
     }
 
     /**
