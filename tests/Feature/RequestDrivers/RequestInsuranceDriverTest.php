@@ -5,8 +5,8 @@ namespace Tests\Feature\RequestDrivers;
 use Tests\TestCase;
 use Tests\TestServiceClient;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Cego\RequestInsurance\Models\RequestInsurance;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Cego\ServiceClientBase\RequestDrivers\RequestInsuranceDriver;
 use Cego\ServiceClientBase\Exceptions\MissingSuggestedDependencyException;
 
