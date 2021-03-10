@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\RequestDrivers;
+namespace Tests\Unit\RequestDrivers;
 
 use Tests\TestCase;
 use Tests\TestServiceClient;
