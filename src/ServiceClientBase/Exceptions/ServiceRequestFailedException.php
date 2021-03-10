@@ -7,12 +7,12 @@ use Throwable;
 use Illuminate\Http\Client\Response;
 
 /**
- * Class SeamlessWalletRequestFailedException
+ * Class ServiceClientBaseRequestFailedException
  */
 class ServiceRequestFailedException extends Exception
 {
     /**
-     * SeamlessWalletRequestFailedException constructor.
+     * ServiceClientBaseRequestFailedException constructor.
      *
      * @param Response $response
      * @param Throwable|null $previous

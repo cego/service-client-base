@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
  *
  * @implements ArrayAccess<string, mixed>
  *
- * @package Cego\SeamlessWallet\RequestDrivers
+ * @package Cego\ServiceClientBase\RequestDrivers
  */
 class Response implements ArrayAccess
 {
