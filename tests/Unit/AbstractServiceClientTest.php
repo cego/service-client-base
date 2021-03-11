@@ -118,4 +118,25 @@ class AbstractServiceClientTest extends TestCase
         // Act
         TestServiceClient::create('');
     }
+
+    /** @test */
+    public function it_can_correctly_create_the_auth_header(): void
+    {
+        // Arrange
+        Http::fake(static function (Request $request) {
+            return Http::response($request->headers()); // Returns headers as json response
+        });
+
+        $expectedAuthHeader = 'Basic VXNlcm5hbWU6UGFzc3dvcmQ=';
+
+        $this->client = TestServiceClient::create('https://lupinsdev.dk/')
+                                         ->auth('Username', 'Password') // Make sure the username and password stay consistent
+                                         ->useRequestInsurance(false);
+
+        // Act
+        $response = $this->client->testGetRequest('/endpoint');
+
+        // Assert
+        $this->assertEquals($expectedAuthHeader, $response->data->get('Authorization')[0]);
+    }
 }

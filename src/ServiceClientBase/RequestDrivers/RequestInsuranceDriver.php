@@ -64,7 +64,7 @@ class RequestInsuranceDriver implements RequestDriver
             'method'  => $method,
             'url'     => $endpoint,
             'payload' => json_encode($data, JSON_THROW_ON_ERROR),
-            'headers' => $headers,
+            'headers' => json_encode($headers, JSON_THROW_ON_ERROR),
         ];
 
         // Add options
