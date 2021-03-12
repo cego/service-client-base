@@ -39,4 +39,20 @@ class TestServiceClient extends AbstractServiceClient
     {
         return $this->postRequest($endpoint, $data, $options);
     }
+
+    /**
+     * Test PUT request method for a service client
+     *
+     * @param string $endpoint
+     * @param array $data
+     * @param array $options
+     *
+     * @return Response
+     *
+     * @throws ServiceRequestFailedException
+     */
+    public function testPutRequest(string $endpoint, array $data = [], array $options = []): Response
+    {
+        return $this->putRequest($endpoint, $data, $options);
+    }
 }
