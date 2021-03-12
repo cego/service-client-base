@@ -259,10 +259,9 @@ abstract class AbstractServiceClient
      */
     protected function getRequestDriver(string $method): RequestDriver
     {
-        $isPostRequest = strcasecmp($method, 'post') == 0;
-        $isPutRequest = strcasecmp($method, 'put') == 0;
+        $isNotGetRequest = strcasecmp($method, 'get') != 0;
 
-        return ($isPostRequest || $isPutRequest) && $this->shouldUseRequestInsurance()
+        return $isNotGetRequest && $this->shouldUseRequestInsurance()
             ? new RequestInsuranceDriver()
             : new HttpRequestDriver();
     }
