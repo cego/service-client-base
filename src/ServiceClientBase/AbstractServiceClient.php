@@ -173,6 +173,22 @@ abstract class AbstractServiceClient
     }
 
     /**
+     * Performs a get request
+     *
+     * @param string $endpoint
+     * @param array $queryParameters
+     * @param array $options
+     *
+     * @return Response
+     *
+     * @throws ServiceRequestFailedException
+     */
+    protected function getRequest(string $endpoint, array $queryParameters = [], array $options = []): Response
+    {
+        return $this->makeRequest('get', $endpoint, $queryParameters, $options);
+    }
+
+    /**
      * Performs a post request
      *
      * @param string $endpoint
@@ -189,19 +205,19 @@ abstract class AbstractServiceClient
     }
 
     /**
-     * Performs a get request
+     * Performs a put request
      *
      * @param string $endpoint
-     * @param array $queryParameters
+     * @param array $data
      * @param array $options
      *
      * @return Response
      *
      * @throws ServiceRequestFailedException
      */
-    protected function getRequest(string $endpoint, array $queryParameters = [], array $options = []): Response
+    protected function putRequest(string $endpoint, array $data = [], array $options = []): Response
     {
-        return $this->makeRequest('get', $endpoint, $queryParameters, $options);
+        return $this->makeRequest('put', $endpoint, $data, $options);
     }
 
     /**
@@ -244,8 +260,9 @@ abstract class AbstractServiceClient
     protected function getRequestDriver(string $method): RequestDriver
     {
         $isPostRequest = strcasecmp($method, 'post') == 0;
+        $isPutRequest = strcasecmp($method, 'put') == 0;
 
-        return $isPostRequest && $this->shouldUseRequestInsurance()
+        return ($isPostRequest || $isPutRequest) && $this->shouldUseRequestInsurance()
             ? new RequestInsuranceDriver()
             : new HttpRequestDriver();
     }

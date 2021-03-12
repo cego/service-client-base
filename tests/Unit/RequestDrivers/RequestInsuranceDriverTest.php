@@ -61,6 +61,38 @@ class RequestInsuranceDriverTest extends TestCase
     }
 
     /** @test */
+    public function it_creates_request_insurance_rows_for_put_requests(): void
+    {
+        // Arrange
+        $this->assertCount(0, RequestInsurance::all());
+        $expectedPayload = json_encode([
+            'data' => 123,
+        ], JSON_THROW_ON_ERROR);
+
+        // Act
+        $this->client->testPutRequest('/my/post/endpoint', ['data' => 123], [
+            RequestInsuranceDriver::OPTION_PRIORITY     => 1,
+            RequestInsuranceDriver::OPTION_RETRY_COUNT  => 2,
+            RequestInsuranceDriver::OPTION_RETRY_FACTOR => 3,
+            RequestInsuranceDriver::OPTION_RETRY_CAP    => 4,
+        ]);
+
+        // Assert
+        $this->assertCount(1, RequestInsurance::all());
+
+        /** @var RequestInsurance $requestInsurance */
+        $requestInsurance = RequestInsurance::findOrFail(1);
+
+        $this->assertEquals('https://lupinsdev.dk/my/post/endpoint', $requestInsurance->url);
+        $this->assertEquals($expectedPayload, $requestInsurance->payload);
+        $this->assertEquals('put', $requestInsurance->method);
+        $this->assertEquals(1, $requestInsurance->priority);
+        $this->assertEquals(2, $requestInsurance->retry_count);
+        $this->assertEquals(3, $requestInsurance->retry_factor);
+        $this->assertEquals(4, $requestInsurance->retry_cap);
+    }
+
+    /** @test */
     public function its_response_is_marked_as_async(): void
     {
         // Act
