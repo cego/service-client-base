@@ -47,6 +47,25 @@ class HttpRequestDriverTest extends TestCase
     }
 
     /** @test */
+    public function it_can_send_put_http_requests_synchronous(): void
+    {
+        // Arrange
+        Http::fake(static function () {
+            return Http::response(["success" => true, "message" => "OK"]);
+        });
+
+        $expectedData = ["success" => true, "message" => "OK"];
+
+        // Act
+        $response = $this->client->testPutRequest('/my/post/endpoint');
+
+        // Assert
+        $this->assertTrue($response->isSynchronous);
+        $this->assertEquals($expectedData, $response->data->toArray());
+        $this->assertEquals(200, $response->code);
+    }
+
+    /** @test */
     public function it_can_send_get_http_requests_synchronous(): void
     {
         // Arrange
