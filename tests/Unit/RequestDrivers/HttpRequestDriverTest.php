@@ -111,4 +111,21 @@ class HttpRequestDriverTest extends TestCase
         // Act
         $this->client->testGetRequest('/my/get/endpoint');
     }
+
+    /** @test */
+    public function it_can_handle_empty_response(): void
+    {
+        // Arrange
+        Http::fake(static function () {
+            return Http::response(null, 200);
+        });
+
+        // Act
+        $response = $this->client->testGetRequest('/my/get/endpoint');
+
+        // Assert
+        $this->assertTrue($response->isSynchronous);
+        $this->assertEmpty($response->data->toArray());
+        $this->assertEquals(200, $response->code);
+    }
 }
