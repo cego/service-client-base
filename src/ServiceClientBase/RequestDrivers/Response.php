@@ -25,7 +25,7 @@ class Response implements ArrayAccess
      * @param array $data
      * @param bool $isSynchronous
      */
-    public function __construct(int $code, ?array $data, bool $isSynchronous)
+    public function __construct(int $code, array $data, bool $isSynchronous)
     {
         $this->code = $code;
         $this->data = new Collection($data);

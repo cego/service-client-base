@@ -46,6 +46,6 @@ class HttpRequestDriver implements RequestDriver
      */
     protected function transformResponse(HttpResponse $httpResponse): Response
     {
-        return new Response($httpResponse->status(), $httpResponse->json(), true);
+        return new Response($httpResponse->status(), $httpResponse->json() ?? [], true);
     }
 }
