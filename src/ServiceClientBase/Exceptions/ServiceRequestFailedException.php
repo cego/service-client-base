@@ -15,15 +15,12 @@ class ServiceRequestFailedException extends Exception
      * ServiceClientBaseRequestFailedException constructor.
      *
      * @param Response $response
+     * @param string $endpoint
      * @param Throwable|null $previous
      */
-    public function __construct(Response $response, Throwable $previous = null)
+    public function __construct(Response $response, string $endpoint, Throwable $previous = null)
     {
-        if ($response->transferStats == null) {
-            $message = sprintf("Failed Service request [%s] \n %s", $response->status(), $response->body());
-        } else {
-            $message = sprintf("Failed Service request [%s] [%s]: \n %s", $response->status(), $response->effectiveUri()->getPath(), $response->body());
-        }
+        $message = sprintf("Failed Service request [%s] [%s]: \n %s", $response->status(), $endpoint, $response->body());
 
         parent::__construct($message, 500, $previous);
     }

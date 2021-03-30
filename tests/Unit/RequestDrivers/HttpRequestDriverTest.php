@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\RequestDrivers;
 
+use Exception;
 use Tests\TestCase;
 use Tests\TestServiceClient;
 use Illuminate\Support\Facades\Http;
@@ -88,14 +89,20 @@ class HttpRequestDriverTest extends TestCase
     public function it_throws_service_request_failed_exceptions_on_server_failure(): void
     {
         // Arrange
-        $this->expectException(ServiceRequestFailedException::class);
+        $body = ["success" => false, "message" => "ERROR"];
 
-        Http::fake(static function () {
-            return Http::response(["success" => false, "message" => "ERROR"], 500);
+        Http::fake(static function () use ($body) {
+            return Http::response($body, 500);
         });
 
         // Act
-        $this->client->testGetRequest('/my/get/endpoint');
+        try {
+            $this->client->testGetRequest('/my/get/endpoint');
+        } catch (Exception $exception) {
+            // Assert
+            $this->assertInstanceOf(ServiceRequestFailedException::class, $exception);
+            $this->assertEquals(sprintf("Failed Service request [500] [https://lupinsdev.dk/my/get/endpoint]: \n %s", json_encode($body)), $exception->getMessage());
+        }
     }
 
     /** @test */
