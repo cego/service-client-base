@@ -33,7 +33,7 @@ class HttpRequestDriver implements RequestDriver
 
             return $this->transformResponse($response);
         } catch (RequestException $exception) {
-            throw new ServiceRequestFailedException($exception->response);
+            throw new ServiceRequestFailedException($exception->response, $endpoint);
         }
     }
 
