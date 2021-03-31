@@ -116,18 +116,24 @@ abstract class AbstractServiceClient
      *  - This does not affect request insurance
      *
      * @param int $timeoutInSeconds
+     *
+     * @return AbstractServiceClient
      */
-    public function withTimeout(int $timeoutInSeconds): void
+    public function withTimeout(int $timeoutInSeconds): self
     {
         $this->globalOptions[HttpRequestDriver::OPTION_TIMEOUT] = $timeoutInSeconds;
+
+        return $this;
     }
 
     /**
      * Reverts any previously set custom timeout, and reverts to whatever the default value is.
      */
-    public function withDefaultTimeout(): void
+    public function withDefaultTimeout(): self
     {
         unset($this->globalOptions[HttpRequestDriver::OPTION_TIMEOUT]);
+
+        return $this;
     }
 
     /**
