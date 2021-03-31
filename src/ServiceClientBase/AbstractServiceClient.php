@@ -112,6 +112,25 @@ abstract class AbstractServiceClient
     }
 
     /**
+     * Sets the timeout for all HTTP requests.
+     *  - This does not affect request insurance
+     *
+     * @param int $timeoutInSeconds
+     */
+    public function withTimeout(int $timeoutInSeconds): void
+    {
+        $this->globalOptions[HttpRequestDriver::OPTION_TIMEOUT] = $timeoutInSeconds;
+    }
+
+    /**
+     * Reverts any previously set custom timeout, and reverts to whatever the default value is.
+     */
+    public function withDefaultTimeout(): void
+    {
+        unset($this->globalOptions[HttpRequestDriver::OPTION_TIMEOUT]);
+    }
+
+    /**
      * Push headers to the global headers array, which applies these headers to all requests made by the client.
      *
      * Either push a single header by:
