@@ -41,6 +41,10 @@ abstract class AbstractServiceClient
         'Accept'        => 'application/json',
     ];
 
+    protected array $globalOptions = [
+
+    ];
+
     /**
      * Private constructor to disallow using new
      *
@@ -235,7 +239,7 @@ abstract class AbstractServiceClient
     protected function makeRequest(string $method, string $endpoint, array $data = [], array $options = []): Response
     {
         return $this->getRequestDriver($method)
-                    ->makeRequest($method, $this->prependBaseUrl($endpoint), $data, $this->globalHeaders, $options);
+                    ->makeRequest($method, $this->prependBaseUrl($endpoint), $data, $this->globalHeaders, array_merge($this->globalOptions, $options));
     }
 
     /**
