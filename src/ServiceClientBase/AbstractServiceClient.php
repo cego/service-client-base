@@ -41,6 +41,10 @@ abstract class AbstractServiceClient
         'Accept'        => 'application/json',
     ];
 
+    protected array $globalOptions = [
+
+    ];
+
     /**
      * Private constructor to disallow using new
      *
@@ -103,6 +107,31 @@ abstract class AbstractServiceClient
         }
 
         $this->useRequestInsurance = $useRequestInsurance;
+
+        return $this;
+    }
+
+    /**
+     * Sets the timeout for all HTTP requests.
+     *  - This does not affect request insurance
+     *
+     * @param int $timeoutInSeconds
+     *
+     * @return AbstractServiceClient
+     */
+    public function withTimeout(int $timeoutInSeconds): self
+    {
+        $this->globalOptions[HttpRequestDriver::OPTION_TIMEOUT] = $timeoutInSeconds;
+
+        return $this;
+    }
+
+    /**
+     * Reverts any previously set custom timeout, and reverts to whatever the default value is.
+     */
+    public function withDefaultTimeout(): self
+    {
+        unset($this->globalOptions[HttpRequestDriver::OPTION_TIMEOUT]);
 
         return $this;
     }
@@ -235,7 +264,7 @@ abstract class AbstractServiceClient
     protected function makeRequest(string $method, string $endpoint, array $data = [], array $options = []): Response
     {
         return $this->getRequestDriver($method)
-                    ->makeRequest($method, $this->prependBaseUrl($endpoint), $data, $this->globalHeaders, $options);
+                    ->makeRequest($method, $this->prependBaseUrl($endpoint), $data, $this->globalHeaders, array_merge($this->globalOptions, $options));
     }
 
     /**

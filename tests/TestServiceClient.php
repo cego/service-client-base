@@ -9,6 +9,16 @@ use Cego\ServiceClientBase\Exceptions\ServiceRequestFailedException;
 class TestServiceClient extends AbstractServiceClient
 {
     /**
+     * Returns the global options array
+     *
+     * @return array
+     */
+    public function getGlobalOptions(): array
+    {
+        return $this->globalOptions;
+    }
+
+    /**
      * Test GET request method for a service client
      *
      * @param string $endpoint

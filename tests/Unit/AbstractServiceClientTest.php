@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Cego\ServiceClientBase\RequestDrivers\HttpRequestDriver;
 use Cego\ServiceClientBase\Exceptions\InvalidHeaderException;
 use Cego\ServiceClientBase\Exceptions\MissingSuggestedDependencyException;
 
@@ -138,5 +139,33 @@ class AbstractServiceClientTest extends TestCase
 
         // Assert
         $this->assertEquals($expectedAuthHeader, $response->data->get('Authorization')[0]);
+    }
+
+    /** @test */
+    public function it_can_set_timeout(): void
+    {
+        // Arrange
+
+        // Act
+        $this->client->withTimeout(123);
+
+        // Assert
+        $this->assertEquals([
+            HttpRequestDriver::OPTION_TIMEOUT => 123,
+        ], $this->client->getGlobalOptions());
+    }
+
+    /** @test */
+    public function it_can_clear_timeouts(): void
+    {
+        // Arrange
+
+        // Act
+        $this->client
+            ->withTimeout(123)
+            ->withDefaultTimeout();
+
+        // Assert
+        $this->assertEquals([], $this->client->getGlobalOptions());
     }
 }
