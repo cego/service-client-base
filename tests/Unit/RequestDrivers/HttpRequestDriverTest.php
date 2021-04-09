@@ -23,7 +23,7 @@ class HttpRequestDriverTest extends TestCase
     {
         parent::setUp();
 
-        $this->client = TestServiceClient::create('https://lupinsdev.dk/')
+        $this->client = TestServiceClient::create('https://my-service-stage.lupinsdev.dk/')
                                          ->auth('Username', 'Password')
                                          ->useRequestInsurance(false);
     }
@@ -101,7 +101,7 @@ class HttpRequestDriverTest extends TestCase
         } catch (Exception $exception) {
             // Assert
             $this->assertInstanceOf(ServiceRequestFailedException::class, $exception);
-            $this->assertEquals(sprintf("Failed Service request [500] [https://lupinsdev.dk/my/get/endpoint]: \n %s", json_encode($body)), $exception->getMessage());
+            $this->assertEquals(sprintf("My Service Stage: Failed request [500] [https://my-service-stage.lupinsdev.dk/my/get/endpoint]: \n %s", json_encode($body)), $exception->getMessage());
         }
     }
 

@@ -20,8 +20,25 @@ class ServiceRequestFailedException extends Exception
      */
     public function __construct(Response $response, string $endpoint, Throwable $previous = null)
     {
-        $message = sprintf("Failed Service request [%s] [%s]: \n %s", $response->status(), $endpoint, $response->body());
+        $message = sprintf("%s: Failed request [%s] [%s]: \n %s", $this->getServiceName($endpoint), $response->status(), $endpoint, $response->body());
 
         parent::__construct($message, 500, $previous);
+    }
+
+    /**
+     * Transforms a
+     *
+     * @param string $endpoint
+     *
+     * @return string
+     */
+    protected function getServiceName(string $endpoint): string
+    {
+        $urlParts = parse_url($endpoint);
+        $serviceSubDomain = explode('.', $urlParts['host'])[0];
+
+        // Converts:
+        // seamless-wallet-stage => Seamless Wallet Stage
+        return ucwords(str_replace('-', ' ', $serviceSubDomain));
     }
 }
