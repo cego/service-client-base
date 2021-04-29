@@ -11,6 +11,9 @@ use Illuminate\Http\Client\Response;
  */
 class ServiceRequestFailedException extends Exception
 {
+    /** @var Response The failed service request response */
+    protected Response $response;
+
     /**
      * ServiceClientBaseRequestFailedException constructor.
      *
@@ -20,6 +23,8 @@ class ServiceRequestFailedException extends Exception
      */
     public function __construct(Response $response, string $endpoint, Throwable $previous = null)
     {
+        $this->response = $response;
+
         $message = sprintf("%s: Failed request [%s] [%s]: \n %s", $this->getServiceName($endpoint), $response->status(), $endpoint, $response->body());
 
         parent::__construct($message, 500, $previous);
@@ -40,5 +45,15 @@ class ServiceRequestFailedException extends Exception
         // Converts:
         // seamless-wallet-stage => Seamless Wallet Stage
         return ucwords(str_replace('-', ' ', $serviceSubDomain));
+    }
+
+    /**
+     * Get the failed response
+     *
+     * @return Response
+     */
+    public function getResponse(): Response
+    {
+        return $this->response;
     }
 }
