@@ -297,7 +297,9 @@ abstract class AbstractServiceClient
 
             throw $exception;
         } finally {
-            $this->logRequest(new Request($method, $endpoint, $data, $this->globalHeaders, $options), $response);
+            if (isset($response)) {
+                $this->logRequest(new Request($method, $endpoint, $data, $this->globalHeaders, $options), $response);
+            }
         }
 
         return $response;
