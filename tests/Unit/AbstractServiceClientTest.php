@@ -2,12 +2,14 @@
 
 namespace Tests\Unit;
 
+use Exception;
 use Tests\TestCase;
 use Tests\TestServiceClient;
 use InvalidArgumentException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Cego\ServiceClientBase\RequestDrivers\RequestLog;
 use Cego\ServiceClientBase\RequestDrivers\HttpRequestDriver;
 use Cego\ServiceClientBase\Exceptions\InvalidHeaderException;
 use Cego\ServiceClientBase\Exceptions\MissingSuggestedDependencyException;
@@ -167,5 +169,159 @@ class AbstractServiceClientTest extends TestCase
 
         // Assert
         $this->assertEquals([], $this->client->getGlobalOptions());
+    }
+
+    /** @test */
+    public function it_can_log_synchronous_successful_requests(): void
+    {
+        // Arrange
+        Http::fake(static function (Request $request) {
+            return Http::response(json_encode(['success' => true], JSON_THROW_ON_ERROR)); // Returns headers as json response
+        });
+
+        $this->assertCount(0, $this->client->getRequestLog());
+
+        // Act
+        $this->client
+            ->useRequestLog()
+            ->testGetRequest('/endpoint');
+
+        // Assert
+        $this->assertCount(1, $this->client->getRequestLog());
+        $this->assertInstanceOf(RequestLog::class, $this->client->getRequestLog()[0]);
+
+        $requestLog = $this->client->getRequestLog(0);
+
+        // Assert Request
+        $this->assertEquals('https://lupinsdev.dk/endpoint', $requestLog->getRequest()->getEndpoint());
+        $this->assertEquals([], $requestLog->getRequest()->getData());
+        $this->assertEquals([
+            'Content-type'  => 'application/json',
+            'Accept'        => 'application/json',
+            'Authorization' => 'Basic ' . base64_encode('Username:Password')
+        ], $requestLog->getRequest()->getHeaders());
+        $this->assertEquals('get', $requestLog->getRequest()->getMethod());
+        $this->assertEquals([], $requestLog->getRequest()->getOptions());
+
+        // Assert Response
+        $this->assertEquals(true, $requestLog->getResponse()->isSynchronous);
+        $this->assertEquals(['success' => true], $requestLog->getResponse()->data->toArray());
+        $this->assertEquals(200, $requestLog->getResponse()->code);
+    }
+
+    /** @test */
+    public function it_can_log_synchronous_failed_requests(): void
+    {
+        // Arrange
+        Http::fake(static function (Request $request) {
+            return Http::response(json_encode(['success' => false], JSON_THROW_ON_ERROR), 404); // Returns headers as json response
+        });
+
+        $this->assertCount(0, $this->client->getRequestLog());
+
+        // Act
+        try {
+            $this->client
+                ->useRequestLog()
+                ->testGetRequest('/endpoint');
+        } catch (Exception $exception) {
+            // Do nothing
+        }
+
+        // Assert
+        $this->assertCount(1, $this->client->getRequestLog());
+        $this->assertInstanceOf(RequestLog::class, $this->client->getRequestLog()[0]);
+
+        $requestLog = $this->client->getRequestLog(0);
+
+        // Assert Request
+        $this->assertEquals('https://lupinsdev.dk/endpoint', $requestLog->getRequest()->getEndpoint());
+        $this->assertEquals([], $requestLog->getRequest()->getData());
+        $this->assertEquals([
+            'Content-type'  => 'application/json',
+            'Accept'        => 'application/json',
+            'Authorization' => 'Basic ' . base64_encode('Username:Password')
+        ], $requestLog->getRequest()->getHeaders());
+        $this->assertEquals('get', $requestLog->getRequest()->getMethod());
+        $this->assertEquals([], $requestLog->getRequest()->getOptions());
+
+        // Assert Response
+        $this->assertEquals(true, $requestLog->getResponse()->isSynchronous);
+        $this->assertEquals(['success' => false], $requestLog->getResponse()->data->toArray());
+        $this->assertEquals(404, $requestLog->getResponse()->code);
+    }
+
+    /** @test */
+    public function it_can_log_asynchronous_requests(): void
+    {
+        // Arrange
+        $this->assertCount(0, $this->client->getRequestLog());
+
+        // Act
+        $this->client
+            ->useRequestLog()
+            ->useRequestInsurance()
+            ->testPostRequest('/endpoint');
+
+        // Assert
+        $this->assertCount(1, $this->client->getRequestLog());
+        $this->assertInstanceOf(RequestLog::class, $this->client->getRequestLog()[0]);
+
+        $requestLog = $this->client->getRequestLog(0);
+
+        // Assert Request
+        $this->assertEquals('https://lupinsdev.dk/endpoint', $requestLog->getRequest()->getEndpoint());
+        $this->assertEquals([], $requestLog->getRequest()->getData());
+        $this->assertEquals([
+            'Content-type'  => 'application/json',
+            'Accept'        => 'application/json',
+            'Authorization' => 'Basic ' . base64_encode('Username:Password')
+        ], $requestLog->getRequest()->getHeaders());
+        $this->assertEquals('post', $requestLog->getRequest()->getMethod());
+        $this->assertEquals([], $requestLog->getRequest()->getOptions());
+
+        // Assert Response
+        $this->assertEquals(false, $requestLog->getResponse()->isSynchronous);
+        $this->assertEquals([], $requestLog->getResponse()->data->toArray());
+        $this->assertEquals(0, $requestLog->getResponse()->code);
+    }
+
+    /** @test */
+    public function it_has_disabled_request_log_by_default(): void
+    {
+        // Arrange
+        Http::fake(static function (Request $request) {
+            return Http::response(json_encode(['success' => true], JSON_THROW_ON_ERROR)); // Returns headers as json response
+        });
+
+        $this->assertCount(0, $this->client->getRequestLog());
+
+        // Act
+        $this->client
+            ->testGetRequest('/endpoint');
+
+        // Assert
+        $this->assertCount(0, $this->client->getRequestLog());
+    }
+
+    /** @test */
+    public function it_can_clear_the_request_log(): void
+    {
+        // Arrange
+        Http::fake(static function (Request $request) {
+            return Http::response(json_encode(['success' => true], JSON_THROW_ON_ERROR)); // Returns headers as json response
+        });
+
+        $this->assertCount(0, $this->client->getRequestLog());
+
+        // Act
+        $this->client
+            ->useRequestLog()
+            ->testGetRequest('/endpoint');
+
+        // Assert
+        $this->assertCount(1, $this->client->getRequestLog());
+        $this->client->clearRequestLog();
+        $this->assertCount(0, $this->client->getRequestLog());
     }
 }

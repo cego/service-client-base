@@ -57,7 +57,7 @@ abstract class AbstractServiceClient
      *
      * @var bool
      */
-    protected bool $logRequests;
+    protected bool $logRequests = false;
 
     /**
      * The request log.
@@ -286,15 +286,20 @@ abstract class AbstractServiceClient
      */
     protected function makeRequest(string $method, string $endpoint, array $data = [], array $options = []): Response
     {
+        $endpoint = $this->prependBaseUrl($endpoint);
+        $options = array_merge($this->globalOptions, $options);
+
         try {
             $response = $this->getRequestDriver($method)
-                ->makeRequest($method, $this->prependBaseUrl($endpoint), $data, $this->globalHeaders, array_merge($this->globalOptions, $options));
+                ->makeRequest($method, $endpoint, $data, $this->globalHeaders, $options);
         } catch (ServiceRequestFailedException $exception) {
-            $response = $exception->getResponse();
+            $response = new Response($exception->getResponse()->status(), $exception->getResponse()->json() ?? [], true);
 
             throw $exception;
+        } catch (\Exception $exception) {
+            throw $exception;
         } finally {
-            $this->logRequest(new Request($method, $endpoint, $data, $options), $response);
+            $this->logRequest(new Request($method, $endpoint, $data, $this->globalHeaders, $options), $response);
         }
 
         return $response;
@@ -405,10 +410,14 @@ abstract class AbstractServiceClient
     /**
      * Returns the current request log
      *
-     * @return RequestLog[]
+     * @return RequestLog[]|RequestLog
      */
-    public function getRequestLog(): array
+    public function getRequestLog(int $index = null)
     {
+        if (is_numeric($index)) {
+            return $this->requestLog[$index];
+        }
+
         return $this->requestLog;
     }
 }
