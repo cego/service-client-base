@@ -296,8 +296,6 @@ abstract class AbstractServiceClient
             $response = new Response($exception->getResponse()->status(), $exception->getResponse()->json() ?? [], true);
 
             throw $exception;
-        } catch (\Exception $exception) {
-            throw $exception;
         } finally {
             $this->logRequest(new Request($method, $endpoint, $data, $this->globalHeaders, $options), $response);
         }
