@@ -3,7 +3,9 @@ namespace Cego\ServiceClientBase;
 
 use InvalidArgumentException;
 use Cego\RequestInsurance\Models\RequestInsurance;
+use Cego\ServiceClientBase\RequestDrivers\Request;
 use Cego\ServiceClientBase\RequestDrivers\Response;
+use Cego\ServiceClientBase\RequestDrivers\RequestLog;
 use Cego\ServiceClientBase\RequestDrivers\RequestDriver;
 use Cego\ServiceClientBase\RequestDrivers\HttpRequestDriver;
 use Cego\ServiceClientBase\Exceptions\InvalidHeaderException;
@@ -41,9 +43,30 @@ abstract class AbstractServiceClient
         'Accept'        => 'application/json',
     ];
 
+    /**
+     * A list of global options that will be applied to all requests
+     *
+     * @var array
+     */
     protected array $globalOptions = [
 
     ];
+
+    /**
+     * A flag to mark if all requests and responses should be logged
+     *
+     * @var bool
+     */
+    protected bool $logRequests = false;
+
+    /**
+     * The request log.
+     *
+     * To enable the request log call ->enableRequestLog()
+     *
+     * @var RequestLog[]
+     */
+    protected array $requestLog = [];
 
     /**
      * Private constructor to disallow using new
@@ -263,8 +286,23 @@ abstract class AbstractServiceClient
      */
     protected function makeRequest(string $method, string $endpoint, array $data = [], array $options = []): Response
     {
-        return $this->getRequestDriver($method)
-                    ->makeRequest($method, $this->prependBaseUrl($endpoint), $data, $this->globalHeaders, array_merge($this->globalOptions, $options));
+        $endpoint = $this->prependBaseUrl($endpoint);
+        $options = array_merge($this->globalOptions, $options);
+
+        try {
+            $response = $this->getRequestDriver($method)
+                ->makeRequest($method, $endpoint, $data, $this->globalHeaders, $options);
+        } catch (ServiceRequestFailedException $exception) {
+            $response = new Response($exception->getResponse()->status(), $exception->getResponse()->json() ?? [], true);
+
+            throw $exception;
+        } finally {
+            if (isset($response)) {
+                $this->logRequest(new Request($method, $endpoint, $data, $this->globalHeaders, $options), $response);
+            }
+        }
+
+        return $response;
     }
 
     /**
@@ -328,5 +366,58 @@ abstract class AbstractServiceClient
     protected function cannotUseRequestInsurance(): bool
     {
         return ! $this->canUseRequestInsurance();
+    }
+
+    /**
+     * Used to enable / disable the request log
+     *
+     * @param bool $useRequestLog
+     *
+     * @return $this
+     */
+    public function useRequestLog($useRequestLog = true): self
+    {
+        $this->logRequests = $useRequestLog;
+
+        return $this;
+    }
+
+    /**
+     * Logs a request and response pair
+     *
+     * @param Request $request
+     * @param Response $response
+     */
+    protected function logRequest(Request $request, Response $response): void
+    {
+        if ($this->logRequests) {
+            $this->requestLog[] = new RequestLog($request, $response);
+        }
+    }
+
+    /**
+     * Clears the request log
+     *
+     * @return $this
+     */
+    public function clearRequestLog(): self
+    {
+        $this->requestLog = [];
+
+        return $this;
+    }
+
+    /**
+     * Returns the current request log
+     *
+     * @return RequestLog[]|RequestLog
+     */
+    public function getRequestLog(int $index = null)
+    {
+        if (is_numeric($index)) {
+            return $this->requestLog[$index];
+        }
+
+        return $this->requestLog;
     }
 }
