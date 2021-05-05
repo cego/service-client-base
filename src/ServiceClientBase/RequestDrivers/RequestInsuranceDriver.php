@@ -36,6 +36,9 @@ class RequestInsuranceDriver implements RequestDriver
      */
     public function makeRequest(string $method, string $endpoint, array $data = [], array $headers = [], array $options = []): Response
     {
+        $headers = array_merge(['User-Agent' => sprintf('ServiceClient/%s', static::class)], $headers);
+
+        /** @var RequestInsurance $requestInsurance */
         $requestInsurance = app()->make(RequestInsurance::class);
 
         /** @phpstan-ignore-next-line Its a magic method from Laravel models */

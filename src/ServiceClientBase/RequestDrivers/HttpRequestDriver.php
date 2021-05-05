@@ -28,7 +28,8 @@ class HttpRequestDriver implements RequestDriver
     {
         try {
             /** @var HttpResponse $response */
-            $response = Http::withHeaders($headers)
+            $response = Http::withHeaders(['User-Agent' => sprintf('ServiceClient/%s', static::class)])
+                            ->withHeaders($headers)
                             ->timeout($options[static::OPTION_TIMEOUT] ?? env("SERVICE_CLIENT_TIMEOUT", 3))
                             ->retry(env("SERVICE_CLIENT_MAXIMUM_NUMBER_OF_RETRIES", 3), env("SERVICE_CLIENT_RETRY_DELAY", 100))
                             ->$method($endpoint, $data);
