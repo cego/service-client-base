@@ -225,7 +225,7 @@ abstract class AbstractServiceClient
     }
 
     /**
-     * Performs a get request
+     * Performs a GET request
      *
      * @param string $endpoint
      * @param array $queryParameters
@@ -241,7 +241,7 @@ abstract class AbstractServiceClient
     }
 
     /**
-     * Performs a post request
+     * Performs a POST request
      *
      * @param string $endpoint
      * @param array $data
@@ -257,7 +257,7 @@ abstract class AbstractServiceClient
     }
 
     /**
-     * Performs a put request
+     * Performs a PUT request
      *
      * @param string $endpoint
      * @param array $data
@@ -270,6 +270,38 @@ abstract class AbstractServiceClient
     protected function putRequest(string $endpoint, array $data = [], array $options = []): Response
     {
         return $this->makeRequest('put', $endpoint, $data, $options);
+    }
+
+    /**
+     * Performs a DELETE request
+     *
+     * @param string $endpoint
+     * @param array $data
+     * @param array $options
+     *
+     * @return Response
+     *
+     * @throws ServiceRequestFailedException
+     */
+    protected function deleteRequest(string $endpoint, array $data = [], array $options = []): Response
+    {
+        return $this->makeRequest('delete', $endpoint, $data, $options);
+    }
+
+    /**
+     * Performs a PATCH request
+     *
+     * @param string $endpoint
+     * @param array $data
+     * @param array $options
+     *
+     * @return Response
+     *
+     * @throws ServiceRequestFailedException
+     */
+    protected function patchRequest(string $endpoint, array $data = [], array $options = []): Response
+    {
+        return $this->makeRequest('patch', $endpoint, $data, $options);
     }
 
     /**
