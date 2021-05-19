@@ -329,6 +329,7 @@ abstract class AbstractServiceClient
 
             throw $exception;
         } finally {
+            /** @phpstan-ignore-next-line */
             if (isset($response)) {
                 $this->logRequest(new Request($method, $endpoint, $data, $this->globalHeaders, $options), $response);
             }

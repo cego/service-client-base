@@ -40,6 +40,11 @@ class ServiceRequestFailedException extends Exception
     protected function getServiceName(string $endpoint): string
     {
         $urlParts = parse_url($endpoint);
+
+        if ($urlParts == false) {
+            return '';
+        }
+
         $serviceSubDomain = explode('.', $urlParts['host'])[0];
 
         // Converts:

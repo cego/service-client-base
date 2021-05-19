@@ -36,7 +36,7 @@ class RequestInsuranceDriver implements RequestDriver
      */
     public function makeRequest(string $method, string $endpoint, array $data = [], array $headers = [], array $options = []): Response
     {
-        $headers = array_merge(['User-Agent' => sprintf('ServiceClient/%s', static::class)], $headers);
+        $headers = array_merge(['User-Agent' => sprintf('ServiceClient/%s', class_basename($this))], $headers);
 
         /** @var RequestInsurance $requestInsurance */
         $requestInsurance = app()->make(RequestInsurance::class);
