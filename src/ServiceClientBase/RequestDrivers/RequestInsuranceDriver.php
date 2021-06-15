@@ -44,7 +44,7 @@ class RequestInsuranceDriver implements RequestDriver
         /** @phpstan-ignore-next-line Its a magic method from Laravel models */
         $requestInsurance::create($this->getRequestData($method, $endpoint, $data, $headers, $options));
 
-        return new Response(0, [], false);
+        return new Response(0, [], [], false);
     }
 
     /**
