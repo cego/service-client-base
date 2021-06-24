@@ -33,9 +33,9 @@ class HttpRequestDriver implements RequestDriver
 
             return $this->transformResponse($response);
         } catch (RequestException $exception) {
-            throw new ServiceRequestFailedException($exception->response->status(), $exception->response->body(), $endpoint, $exception);
+            throw new ServiceRequestFailedException($exception->response->status(), $exception->response->body(), $exception->response->headers(), $endpoint, $exception);
         } catch (ConnectionException $exception) {
-            throw new ServiceRequestFailedException(0, 'No Response: TIMEOUT', $endpoint, $exception);
+            throw new ServiceRequestFailedException(0, 'No Response: TIMEOUT', [], $endpoint, $exception);
         }
     }
 

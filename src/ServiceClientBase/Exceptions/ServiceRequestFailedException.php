@@ -12,21 +12,24 @@ class ServiceRequestFailedException extends Exception
 {
     public int $responseCode;
     public string $responseBody;
+    public array $responseHeaders;
 
     /**
      * ServiceClientBaseRequestFailedException constructor.
      *
-     * @param int $code
-     * @param string $body
+     * @param int $responseCode
+     * @param string $responseBody
+     * @param array $responseHeaders
      * @param string $endpoint
      * @param Throwable|null $previous
      */
-    public function __construct(int $code, string $body, string $endpoint, Throwable $previous = null)
+    public function __construct(int $responseCode, string $responseBody, array $responseHeaders, string $endpoint, Throwable $previous = null)
     {
-        $this->responseCode = $code;
-        $this->responseBody = $body;
+        $this->responseCode = $responseCode;
+        $this->responseBody = $responseBody;
+        $this->responseHeaders = $responseHeaders;
 
-        $message = sprintf("%s: Failed request [%s] [%s]: \n %s", $this->getServiceName($endpoint), $code, $endpoint, $body);
+        $message = sprintf("%s: Failed request [%s] [%s]: \n %s", $this->getServiceName($endpoint), $responseCode, $endpoint, $responseBody);
 
         parent::__construct($message, 500, $previous);
     }
