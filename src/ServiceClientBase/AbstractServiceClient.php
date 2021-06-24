@@ -325,7 +325,7 @@ abstract class AbstractServiceClient
             $response = $this->getRequestDriver($method)
                 ->makeRequest($method, $endpoint, $data, $this->globalHeaders, $options);
         } catch (ServiceRequestFailedException $exception) {
-            $response = new Response($exception->getResponse()->status(), $exception->getResponse()->json() ?? [], $exception->getResponse()->headers(), true);
+            $response = new Response($exception->responseCode, json_decode($exception->responseBody, true) ?? [], $exception->responseHeaders, true);
 
             throw $exception;
         } finally {

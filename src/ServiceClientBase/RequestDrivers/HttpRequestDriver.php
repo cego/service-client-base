@@ -5,6 +5,7 @@ namespace Cego\ServiceClientBase\RequestDrivers;
 use BadMethodCallException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response as HttpResponse;
 use Cego\ServiceClientBase\Exceptions\ServiceRequestFailedException;
 
@@ -32,7 +33,9 @@ class HttpRequestDriver implements RequestDriver
 
             return $this->transformResponse($response);
         } catch (RequestException $exception) {
-            throw new ServiceRequestFailedException($exception->response, $endpoint);
+            throw new ServiceRequestFailedException($exception->response->status(), $exception->response->body(), $exception->response->headers(), $endpoint, $exception);
+        } catch (ConnectionException $exception) {
+            throw new ServiceRequestFailedException(0, 'No Response: TIMEOUT', [], $endpoint, $exception);
         }
     }
 
@@ -48,6 +51,7 @@ class HttpRequestDriver implements RequestDriver
      * @return HttpResponse
      *
      * @throws RequestException
+     * @throws ConnectionException
      */
     protected function sendRequestWithRetries(string $method, string $endpoint, array $data, array $headers, array $options): HttpResponse
     {
@@ -56,11 +60,20 @@ class HttpRequestDriver implements RequestDriver
         $delay = env("SERVICE_CLIENT_RETRY_DELAY", 100);
 
         for ($try = 0; $try < $retries; $try++) {
-            /** @var HttpResponse $response */
-            $response = Http::withHeaders(['User-Agent' => sprintf('ServiceClient/%s', class_basename($this))])
-                ->withHeaders($headers)
-                ->timeout($options[static::OPTION_TIMEOUT] ?? $timeout)
-                ->$method($endpoint, $data);
+            try {
+                /** @var HttpResponse $response */
+                $response = Http::withHeaders(['User-Agent' => sprintf('ServiceClient/%s', class_basename($this))])
+                    ->withHeaders($headers)
+                    ->timeout($options[static::OPTION_TIMEOUT] ?? $timeout)
+                    ->$method($endpoint, $data);
+            } catch (ConnectionException $exception) {
+                // If we have used up all of our retries, throw an exception
+                if ($try == $retries - 1) {
+                    throw $exception;
+                }
+
+                continue;
+            }
 
             // If successful then return the response
             if ($response->successful()) {
