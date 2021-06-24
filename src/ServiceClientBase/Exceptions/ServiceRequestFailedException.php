@@ -4,28 +4,29 @@ namespace Cego\ServiceClientBase\Exceptions;
 
 use Exception;
 use Throwable;
-use Illuminate\Http\Client\Response;
 
 /**
  * Class ServiceClientBaseRequestFailedException
  */
 class ServiceRequestFailedException extends Exception
 {
-    /** @var Response The failed service request response */
-    protected Response $response;
+    public int $responseCode;
+    public string $responseBody;
 
     /**
      * ServiceClientBaseRequestFailedException constructor.
      *
-     * @param Response $response
+     * @param int $code
+     * @param string $body
      * @param string $endpoint
      * @param Throwable|null $previous
      */
-    public function __construct(Response $response, string $endpoint, Throwable $previous = null)
+    public function __construct(int $code, string $body, string $endpoint, Throwable $previous = null)
     {
-        $this->response = $response;
+        $this->responseCode = $code;
+        $this->responseBody = $body;
 
-        $message = sprintf("%s: Failed request [%s] [%s]: \n %s", $this->getServiceName($endpoint), $response->status(), $endpoint, $response->body());
+        $message = sprintf("%s: Failed request [%s] [%s]: \n %s", $this->getServiceName($endpoint), $code, $endpoint, $body);
 
         parent::__construct($message, 500, $previous);
     }
@@ -50,15 +51,5 @@ class ServiceRequestFailedException extends Exception
         // Converts:
         // seamless-wallet-stage => Seamless Wallet Stage
         return ucwords(str_replace('-', ' ', $serviceSubDomain));
-    }
-
-    /**
-     * Get the failed response
-     *
-     * @return Response
-     */
-    public function getResponse(): Response
-    {
-        return $this->response;
     }
 }
